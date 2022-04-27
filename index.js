@@ -117,34 +117,14 @@ client.on('messageCreate', (message) => {
   try{
     if(message.content.toLowerCase().includes('老ㄆㄛˊ') || message.content.toLowerCase().includes('waifu') ){
        if(message.author.id === process.env.me) return;
-        message.reply('醒').then(message => {
-          console.log(message.reference, 'id' + message.id);
-          if(message.author.id === process.env.botid){
-          const c = message.id;
-          console.log('c = ' + c)};
-          console.log(message.id);
-;      //msg is an instance of Message
-});
-      if(message.type === "REPLY"){console.log(message.fetchReference())};
- }} catch (e) {
-    console.log(e)}
-  });
+        message.reply('醒')
+}
+  }catch (e) {console.log(e)}});
 client.on('messageCreate', (message) => {
   try{   
     if((message.mentions.members.first() === process.env.botid) && (message.content.toLowerCase().inclues("閉嘴"))){
 message.reply("蛤");
   }
-} catch (e) {    console.log(e)}
-  });
-client.on('messageCreate', (message) => {
-  try{     
-    if((message.author.id === process.env.botid) && (message.content.toLowerCase().includes('醒'))){
-        const messageid = message.id
-console.log(messageid);     
-      }
-    if(message.refence === messageid){
-        message.channel.send('a')
-    };
 } catch (e) {    console.log(e)}
   });
 
@@ -274,12 +254,28 @@ client.on('messageCreate', (message) => {
 });
 client.on('messageCreate', (message) => {
 try{
-  if (message.member.roles.cache.some(role => role.name == "管理員") && message.content.toLowerCase().includes(prefix + 'mute') ){
+  if (message.content.toLowerCase().includes(prefix + 'mute')){
+    if(!message.member.permissions.has('TIMEOUT_MEMBERS')) return message.channel.send("笑死你沒權限")
+    if (message.author.bot) return message.reply ("你是不會用自己賬號打嗎")
     const member = message.mentions.members.first() || message.guild.members.cache.get(args[0])
+    let reason0 = message.content.split(">");
+    let reason1 = reason0[1]
+    if(reason1.length == 0) var reason = ('欸我不知道');
+    if(!reason1.length == 0) var reason = reason1;
     if(!member) return message.reply("阿你到底要我禁誰")
+    if(member.permissions.has('ADMINISTRATOR')) return message.reply('管管怎麽禁言')
 member.timeout(10 * 6 * 5 * 1000)
-message.channel.send("<@" + member + ">" + "誰讓你在這裡廢話？滾, 5分鐘後再回來（X")
-.catch(console.log); 
+    message.channel.send("<@" + member + ">" + "誰讓你在這裡廢話？滾, 5分鐘後再回來（X")
+.catch(console.log);
+    if(message.guild.id === process.env.grp){
+let channel = client.channels.fetch(process.env.warn).then(channel => {
+          channel.send('人:' + member + '\n原因:' + reason + '\n時間: 5分鐘')
+        }).catch(err => {console.log(err)}); 
+    };
+      if(message.guild.id === process.env.grp1){
+let channel = client.channels.fetch(process.env.warn1).then(channel => {
+          channel.send('人:' + member + '\n原因:' + reason + '\n時間: 5分鐘')
+        }).catch(err => {console.log(err)})};
   }} catch (e) {
     console.log(e)}
 });
