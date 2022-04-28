@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const fetch = require('node-fetch');
 const {MessageAttachment}=require('discord.js');
 const {
     Client,
@@ -94,11 +95,14 @@ client.on('guildMemberUpdate', (oldMember, newMember) => { //i.e role(s) were re
 	const removedRoles = oldMember.roles.cache.filter(role => !newMember.roles.cache.has(role.id));
 	if (removedRoles.size > 0) {
      const newr = (`${oldMember.displayName} 不再是 ${removedRoles.map(r => r.name)} 了`);
+    console.log(newr);
      const Embed = new MessageEmbed()
     .setTitle('身份組變了欸~')
     .setDescription(newr)
     .setColor('RANDOM');
-    newMember.guild.channels.cache.find(ch => ch.name.toLowerCase() === 'log').send({ embeds: [Embed] });;} //i.e role(s) were added
+    let rolelog = newMember.guild.channels.cache.find(ch => ch.name.toLowerCase() === 'log');
+    if(!rolelog) return;
+    rolelog.send({ embeds: [Embed] });;} //i.e role(s) were added
 	const addedRoles = newMember.roles.cache.filter(role => !oldMember.roles.cache.has(role.id));
 	if (addedRoles.size > 0) {
 		console.log(`${oldMember.displayName} 現在是 ${addedRoles.map(r => r.name)} 了`);
@@ -108,9 +112,19 @@ client.on('guildMemberUpdate', (oldMember, newMember) => { //i.e role(s) were re
     .setTitle('身份組變了欸~')
     .setDescription(newr1)
     .setColor('RANDOM');
-    newMember.guild.channels.cache.find(ch => ch.name.toLowerCase() === 'log').send({ embeds: [Embed1] });;} catch (e) {
+    let log = newMember.guild.channels.cache.find(ch => ch.name.toLowerCase() === 'log');
+    if(!log) return;
+    log.send({ embeds: [Embed1] });;} catch (e) {
     console.log(e)}
   });
+client.on('messageDelete', function (message) {
+  let deleted = `**信息刪除了** \n ${message.author.tag} 在 ${message.channel.name} 的信息被刪除了 \n 信息内容:  ${message.cleanContent} `
+    // post in the server's log channel, by finding the accuratebotlog channel (SERVER ADMINS **MUST** CREATE THIS CHANNEL ON THEIR OWN, IF THEY WANT A LOG)
+    let log = message.guild.channels.cache.find(ch => ch.name.toLowerCase() === 'log');
+    if(!log) return;
+      log.send(deleted)
+})
+
 
 
 client.on('messageCreate', (message) => {
@@ -254,7 +268,7 @@ client.on('messageCreate', (message) => {
 });
 client.on('messageCreate', (message) => {
 try{
-  if (message.content.toLowerCase().includes(prefix + 'mute')){
+  if (message.content.startsWith(prefix + 'mute')){
     if(!message.member.permissions.has('TIMEOUT_MEMBERS')) return message.channel.send("笑死你沒權限")
     if (message.author.bot) return message.reply ("你是不會用自己賬號打嗎")
     const member = message.mentions.members.first() || message.guild.members.cache.get(args[0])
@@ -342,8 +356,7 @@ client.on('messageCreate',  async (message) => {
       try{
         if(message.channel.id === process.env.log_channel) return;
         let channel = client.channels.fetch(process.env.log_channel).then(channel => {
-          channel.send('人:' + message.author.tag + ' , 訊息:' + message.content + ' , 群:' + message.guild.name + ' , 頻道:' + message.channel.name, { split: true })
-        }).catch(err => {
+          channel.send('人:' + message.author.tag + ' , 訊息:' + message.content + ' , 群:' + message.guild.name + ' , 頻道:' + message.channel.name, { split: true });}).catch(err => {
           console.log(err)
         })
     }catch (error) {
@@ -351,6 +364,38 @@ client.on('messageCreate',  async (message) => {
      // put your code here
 
 });
+
+
+client.on(`messageCreate`,function(message){
+  if (message.attachments.size > 0) {
+  
+        let ext = ["png" || "jpg" || "gif" || "doc" || "ppt" || "pptx" || "js" || "mp4" || "mp3" || "m4a" || "webm" || "zip"];
+  let request = require(`request`);
+let fs = require(`fs`);
+function download(url){
+    request.get(url)
+        .on('error', console.error)
+        .pipe(fs.createWriteStream(`file.${ext}`));
+};
+    if(message.attachments.first()){//checks if an attachment is sent
+      try{//Download only png (customize this)
+            download(message.attachments.first().url);//Function I will show later
+        } catch(e) {console.log (e)}
+    }
+          if(message.channel.id === process.env.log_channel) return;
+        let channel = client.channels.fetch(process.env.log_channel).then(channel => {
+          let content = `人: ${message.author.tag} , 群: ${message.guild.name} , 頻道: ${message.channel.name} , 圖片:`
+          let fileext = `file.${ext}`
+          channel.send(content);
+        channel.send({content: `${content}' files:\n⁣`, files: [
+    { attachment: fileext }
+]});
+        }).catch(err => {
+          console.log(err)
+        })}
+});
+
+
 
 
 client.login(process.env.token).then(() => {
