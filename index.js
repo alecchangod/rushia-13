@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const translate = require('@vitalets/google-translate-api');
 const fetch = require('node-fetch');
 const {MessageAttachment}=require('discord.js');
 const {
@@ -401,7 +402,19 @@ client.on('messageUpdate', (oldMessage, newMessage) => { // Old message may be u
   let channel = client.channels.fetch(process.env.log_channel).then(channel => {
 channel.send(`人：${newMessage.author.tag} 原信息： ${oldMessage} ,新信息： ${newMessage}`);})
 });
-
+client.on('messageCreate', (message) => {
+  if(message.content.toLowerCase().includes(prefix + 'tl')){
+    var trantext = ""
+let text = message.content.split(" ");
+    let trans = text[1];
+    var trantext = text[1];
+    translate(trantext, {to: 'zh-TW'}).then(res => {
+      message.channel.send(`原語言：${res.from.language.iso} \n 譯文： ${res.text} \n ||沒錯就是Google渣翻||`)
+}).catch(err => {
+    console.error(err);
+});
+ }
+});
 
 
 client.login(process.env.token).then(() => {
