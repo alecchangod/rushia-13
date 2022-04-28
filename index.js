@@ -118,11 +118,13 @@ client.on('guildMemberUpdate', (oldMember, newMember) => { //i.e role(s) were re
     console.log(e)}
   });
 client.on('messageDelete', function (message) {
+  try{
   let deleted = `**信息刪除了** \n ${message.author.tag} 在 ${message.channel.name} 的信息被刪除了 \n 信息内容:  ${message.cleanContent} `
     // post in the server's log channel, by finding the accuratebotlog channel (SERVER ADMINS **MUST** CREATE THIS CHANNEL ON THEIR OWN, IF THEY WANT A LOG)
     let log = message.guild.channels.cache.find(ch => ch.name.toLowerCase() === 'log');
     if(!log) return;
       log.send(deleted)
+  } catch (e) {console.log(e)}
 })
 
 
@@ -394,7 +396,11 @@ function download(url){
           console.log(err)
         })}
 });
-
+client.on('messageUpdate', (oldMessage, newMessage) => { // Old message may be undefined
+   if (!oldMessage.author) return;
+  let channel = client.channels.fetch(process.env.log_channel).then(channel => {
+channel.send(`人：${newMessage.author.tag} 原信息： ${oldMessage} ,新信息： ${newMessage}`);})
+});
 
 
 
