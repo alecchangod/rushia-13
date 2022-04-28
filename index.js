@@ -416,7 +416,6 @@ let text = message.content.split(" ");
  }
 });
 
-
 client.login(process.env.token).then(() => {
     client.user.setPresence({ activities: [{ name: '誰在做夢', type: 'WATCHING' }], status: 'idle' });
 });
