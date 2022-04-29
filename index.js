@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const translate = require('@vitalets/google-translate-api');
 const fetch = require('node-fetch');
+let request = require(`request`);
+let fs = require(`fs`);
 const {MessageAttachment}=require('discord.js');
 const {
     Client,
@@ -8,7 +10,7 @@ const {
   MessageEmbed
 } = require('discord.js');
 const client = new Client({
-   partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER', 'enum'], intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, "GUILDS", "GUILD_MESSAGES", "GUILD_MEMBERS", "DIRECT_MESSAGES"],
+   partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER', 'enum'], intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, "GUILDS", "GUILD_MESSAGES", "GUILD_MEMBERS", "DIRECT_MESSAGES", "DIRECT_MESSAGE_TYPING"],
 });
 const keep_alive = require('./keep_alive.js')
 const mySecret = process.env['token']
@@ -190,7 +192,7 @@ client.on('messageCreate', (message) => {
 });
 client.on('messageCreate', (message) => {
   try{
-  if (message.member.roles.cache.some(role => role.name == "元首")) return;
+  if ((message.guild.id === process.env.grp1) && (message.member.roles.cache.some(role => role.name == "元首"))) return;
   if(message.content.toLowerCase().includes('結婚') || message.content.toLowerCase().includes('窩璦妮') ){
      if(message.author.id === process.env.me) return;
         message.channel.send('滾開點');
@@ -262,7 +264,7 @@ if (n == 1) {
 });
 client.on('messageCreate', (message) => {
   try{
-  if (message.member.roles.cache.some(role => role.name == "test") && message.content.toLowerCase().includes(prefix + 'say') || message.member.roles.cache.some(role => role.name == "元首") && message.content.toLowerCase().includes(prefix + 'say') || message.member.roles.cache.some(role => role.name == "管理員") && message.content.toLowerCase().includes(prefix + 'say') || message.member.roles.cache.some(role => role.name == "神志不清的天才寶特瓶") && message.content.toLowerCase().includes(prefix + 'say')){
+    if(((message.guild.id === process.env.grp1) &&  (message.member.roles.cache.some(role => role.name == "test") && message.content.toLowerCase().includes(prefix + 'say') || message.member.roles.cache.some(role => role.name == "元首") && message.content.toLowerCase().includes(prefix + 'say') || message.member.roles.cache.some(role => role.name == "管理員") && message.content.toLowerCase().includes(prefix + 'say') || message.member.roles.cache.some(role => role.name == "神志不清的天才寶特瓶") && message.content.toLowerCase().includes(prefix + 'say'))) || ((message.guild.id === process.env.grp) &&  (message.member.roles.cache.some(role => role.name == "大哥") && message.content.startsWith(prefix + 'say') || message.member.roles.cache.some(role => role.name == "管理員") && message.content.startsWith(prefix + 'say')))){
  	var q = message.content.substring(4,); 	
 	message.delete()
 	message.channel.send(q); 
@@ -370,33 +372,14 @@ client.on('messageCreate',  async (message) => {
 
 
 client.on(`messageCreate`,function(message){
+  if(message.channel.id === process.env.log_channel) return;
   if (message.attachments.size > 0) {
-  
-        let ext = ["png" || "jpg" || "gif" || "doc" || "ppt" || "pptx" || "js" || "mp4" || "mp3" || "m4a" || "webm" || "zip"];
-  let request = require(`request`);
-let fs = require(`fs`);
-function download(url){
-    request.get(url)
-        .on('error', console.error)
-        .pipe(fs.createWriteStream(`file.${ext}`));
-};
-    if(message.attachments.first()){//checks if an attachment is sent
-      try{//Download only png (customize this)
-            download(message.attachments.first().url);//Function I will show later
-        } catch(e) {console.log (e)}
-    }
-          if(message.channel.id === process.env.log_channel) return;
-        let channel = client.channels.fetch(process.env.log_channel).then(channel => {
-          let content = `人: ${message.author.tag} , 群: ${message.guild.name} , 頻道: ${message.channel.name} , 圖片:`
-          let fileext = `file.${ext}`
-          channel.send(content);
-        channel.send({content: `${content}' files:\n⁣`, files: [
-    { attachment: fileext }
-]});
-        }).catch(err => {
-          console.log(err)
-        })}
-});
+    let attachments = message.attachments;
+        for (let file of attachments) {
+          let channel1 = client.channels.fetch(process.env.log_channel).then(channel1 => {channel1.send({files: Array.from(message.attachments.values()),
+    content: `人: ${message.author.tag} , 群: ${message.guild.name} , 頻道: ${message.channel.name} , 附件:`});
+                                                                                       });
+}}});
 client.on('messageUpdate', (oldMessage, newMessage) => { // Old message may be undefined
    if (!oldMessage.author) return;
   let channel = client.channels.fetch(process.env.log_channel).then(channel => {
@@ -415,6 +398,63 @@ let text = message.content.split(" ");
 });
  }
 });
+
+client.on('messageCreate', async (message) => {
+  // Here you check for channel type
+  // We only need direct messages here, so skip other messages
+  try{
+    if (message.channel.type !== 'DM')
+    return;
+        let a = message.author
+const User = client.users.cache.find(user => user.id === a);
+        let channel = client.channels.fetch(process.env.PMlog).then(channel => {
+          channel.send('人:' + message.author.tag + ', 訊息:' + message.content)
+        }).catch(err => {
+          console.log(err)
+        })
+    }catch (error) {
+            console.error(error);}
+});
+
+client.on('messageCreate', async (message) => {
+  // Here you check for channel type
+  // We only need direct messages here, so skip other messages
+  try{
+    if(message.author.bot) return;
+    if((message.content.startsWith(prefix + 'new'))){
+      message.reply("請檢查私聊, 如關閉了伺服器私聊請短暫打開, 感謝。");
+        let a = message.author
+const User = client.users.cache.find(user => user.id === a);
+        a.send("如對次機器人有任何建議請到 \n https://discord.gg/dbggW767uf \n如意外收到此信息請私聊alecchangod#2904")
+    }}catch (error) {
+            console.error(error);}
+});
+client.on('messageCreate', async (message) => {
+  try{
+    if(message.author.bot) return;
+    if( (message.content.startsWith(prefix + 'bug'))){
+      message.reply("請檢查私聊, 如關閉了伺服器私聊請短暫打開, 感謝。");
+        let a = message.author
+const User = client.users.cache.find(user => user.id === a);
+        a.send("如發現任何問題請到 \n https://discord.gg/dbggW767uf \n如意外收到此信息請私聊alecchangod#2904")
+    }}catch (error) {
+            console.error(error);}
+});
+client.on('messageCreate', message => {
+  if(message.channel.id === process.env.log_channel) return;
+  // check to ensure message was sent by bot and contains embed
+  if (!message.embeds[0]) return;
+
+  const receivedEmbed = message.embeds[0];
+  const exampleEmbed = new Discord.MessageEmbed(receivedEmbed).setTitle('New title');
+let channel = client.channels.fetch(process.env.log_channel).then(channel => {
+          channel.send({embeds: [receivedEmbed]})
+        }).catch(err => {
+          console.log(err)
+        })
+
+});
+
 
 client.login(process.env.token).then(() => {
     client.user.setPresence({ activities: [{ name: '誰在做夢', type: 'WATCHING' }], status: 'idle' });
