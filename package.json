@@ -12,13 +12,11 @@
     "node": "^16.6.1"
   },
   "dependencies": {
-    "@discordjs/voice": "^0.8.0",
     "@vitalets/google-translate-api": "^8.0.0",
+    "ascii-table": "^0.0.9",
     "cron": "^1.8.2",
-    "discord-prefix": "^3.0.0",
-    "discord.js": "^13.6.0",
-    "node-fetch": "^2.6.7",
-    "request": "^2.88.2",
-    "request-progress": "^3.0.0"
+    "discord.js": "^13.8.0",
+    "express": "^4.18.1",
+    "ip": "^1.1.8"
   }
 }
